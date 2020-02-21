@@ -94,3 +94,5 @@ class CtdetDetector(BaseDetector):
         if bbox[4] > self.opt.vis_thresh:
           debugger.add_coco_bbox(bbox[:4], j - 1, bbox[4], img_id='ctdet')
     debugger.show_all_imgs(pause=self.pause)
+    # Uncomment to save predicted image visualizations
+    #debugger.save_all_imgs(path='/home/adnan/Workspace/CenterNet/data/refined_corners/predicted_images', genID=True)
