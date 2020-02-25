@@ -94,7 +94,7 @@ class MultiPoseDetector(BaseDetector):
         output['hm_hp'][0].detach().cpu().numpy())
       debugger.add_blend_img(img, pred, 'pred_hmhp')
   
-  def show_results(self, debugger, image, results):
+  def show_results(self, debugger, image, results, image_path=None):
     debugger.add_img(image, img_id='multi_pose')
     for bbox in results[1]:
       if bbox[4] > self.opt.vis_thresh:

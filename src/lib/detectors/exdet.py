@@ -122,7 +122,7 @@ class ExdetDetector(BaseDetector):
     return results
 
 
-  def show_results(self, debugger, image, results):
+  def show_results(self, debugger, image, results, image_path=None):
     debugger.add_img(image, img_id='exdet')
     for j in range(1, self.num_classes + 1):
       for bbox in results[j]:

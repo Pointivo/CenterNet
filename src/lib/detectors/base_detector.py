@@ -76,7 +76,7 @@ class BaseDetector(object):
   def debug(self, debugger, images, dets, output, scale=1):
     raise NotImplementedError
 
-  def show_results(self, debugger, image, results):
+  def show_results(self, debugger, image, results, image_path=None):
    raise NotImplementedError
 
   def run(self, image_or_path_or_tensor, meta=None):
@@ -137,7 +137,7 @@ class BaseDetector(object):
     tot_time += end_time - start_time
 
     if self.opt.debug >= 1:
-      self.show_results(debugger, image, results)
+      self.show_results(debugger, image, results, image_or_path_or_tensor)
     
     return {'results': results, 'tot': tot_time, 'load': load_time,
             'pre': pre_time, 'net': net_time, 'dec': dec_time,
