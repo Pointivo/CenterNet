@@ -2,8 +2,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
+from pathlib import Path
+
 import cv2
+import numpy as np
+
 from .ddd_utils import compute_box_3d, project_to_image, draw_box_3d
 
 
@@ -200,7 +203,6 @@ class Debugger(object):
             cv2.putText(self.imgs[img_id], txt, (vis_x, vis_y - 2),
                         font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
 
-
     def add_coco_hp(self, points, img_id='default'):
         points = np.array(points, dtype=np.int32).reshape(self.num_joints, 2)
         for j in range(self.num_joints):
@@ -211,7 +213,6 @@ class Debugger(object):
                 cv2.line(self.imgs[img_id], (points[e[0], 0], points[e[0], 1]),
                          (points[e[1], 0], points[e[1], 1]), self.ec[j], 2,
                          lineType=cv2.LINE_AA)
-
 
     def add_points(self, points, img_id='default'):
         num_classes = len(points)
@@ -225,7 +226,6 @@ class Debugger(object):
                 cv2.circle(self.imgs[img_id], (points[i][j][0] * self.down_ratio,
                                                points[i][j][1] * self.down_ratio),
                            3, (int(c[0]), int(c[1]), int(c[2])), -1)
-
 
     def show_all_imgs(self, pause=False, time=0):
         if not self.ipynb:
@@ -248,12 +248,11 @@ class Debugger(object):
                     self.plt.imshow(v)
             self.plt.show()
 
-
     def save_img(self, imgId='default', path='./cache/debug/'):
         cv2.imwrite(path + '{}.png'.format(imgId), self.imgs[imgId])
 
-
     def save_all_imgs(self, path='./cache/debug/', prefix='', genID=False):
+        Path(path).mkdir(exist_ok=True, parents=True)
         if genID:
             try:
                 idx = int(np.loadtxt(path + '/id.txt'))
@@ -263,7 +262,6 @@ class Debugger(object):
             np.savetxt(path + '/id.txt', np.ones(1) * (idx + 1), fmt='%d')
         for i, v in self.imgs.items():
             cv2.imwrite(path + '/{}{}.png'.format(prefix, i), v)
-
 
     def remove_side(self, img_id, img):
         if not (img_id in self.imgs):
@@ -284,13 +282,11 @@ class Debugger(object):
             b -= 1
         self.imgs[img_id] = self.imgs[img_id][t:b + 1, l:r + 1].copy()
 
-
     def project_3d_to_bird(self, pt):
         pt[0] += self.world_size / 2
         pt[1] = self.world_size - pt[1]
         pt = pt * self.out_size / self.world_size
         return pt.astype(np.int32)
-
 
     def add_ct_detection(
             self, img, dets, show_box=False, show_txt=True,
@@ -327,7 +323,6 @@ class Debugger(object):
                                         dtype=np.float32)
                         self.add_coco_bbox(bbox, dets[i, -1], dets[i, 2], img_id=img_id)
 
-
     def add_3d_detection(
             self, image_or_path, dets, calib, show_txt=False,
             center_thresh=0.5, img_id='det'):
@@ -348,7 +343,6 @@ class Debugger(object):
                         box_3d = compute_box_3d(dim, loc, rot_y)
                         box_2d = project_to_image(box_3d, calib)
                         self.imgs[img_id] = draw_box_3d(self.imgs[img_id], box_2d, cl)
-
 
     def compose_vis_add(
             self, img_path, dets, calib,
@@ -378,7 +372,6 @@ class Debugger(object):
         self.imgs[img_id] = np.concatenate(
             [self.imgs[img_id], self.imgs[bev]], axis=1)
 
-
     def add_2d_detection(
             self, img, dets, show_box=False, show_txt=True,
             center_thresh=0.5, img_id='det'):
@@ -391,7 +384,6 @@ class Debugger(object):
                     self.add_coco_bbox(
                         bbox, cat - 1, dets[cat][i, -1],
                         show_txt=show_txt, img_id=img_id)
-
 
     def add_bird_view(self, dets, center_thresh=0.3, img_id='bird'):
         bird_view = np.ones((self.out_size, self.out_size, 3), dtype=np.uint8) * 230
@@ -416,7 +408,6 @@ class Debugger(object):
                                  (rect[e[1]][0], rect[e[1]][1]), lc, t,
                                  lineType=cv2.LINE_AA)
         self.imgs[img_id] = bird_view
-
 
     def add_bird_views(self, dets_dt, dets_gt, center_thresh=0.3, img_id='bird'):
         alpha = 0.5
