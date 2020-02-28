@@ -5,6 +5,7 @@ from __future__ import print_function
 import cv2
 import numpy as np
 from progress.bar import Bar
+import os
 import time
 import torch
 
@@ -89,7 +90,7 @@ class BaseDetector(object):
     if isinstance(image_or_path_or_tensor, np.ndarray):
       image = image_or_path_or_tensor
     elif type(image_or_path_or_tensor) == type (''): 
-      image = cv2.imread(image_or_path_or_tensor)
+      image = cv2.imread(os.path.realpath(image_or_path_or_tensor))
     else:
       image = image_or_path_or_tensor['image'][0].numpy()
       pre_processed_images = image_or_path_or_tensor
