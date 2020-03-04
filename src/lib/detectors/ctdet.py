@@ -18,6 +18,7 @@ from models.utils import flip_tensor
 from utils.post_process import ctdet_post_process
 
 from .base_detector import BaseDetector
+from image_recognition.app.dvo.ground_truths.object_detection import ObjectDetectionLabeledData, ObjectBbox2D
 
 
 class CtdetDetector(BaseDetector):
@@ -88,14 +89,23 @@ class CtdetDetector(BaseDetector):
 
     def show_results(self, debugger, image, results, image_path=None):
         if image_path is not None:
-            img_id = Path(image_path).name
+            image_path = Path(image_path)
+            img_id = image_path.name
         else:
             img_id = 'ctdet'
         debugger.add_img(image, img_id=img_id)
+        object_bboxes = []
         for j in range(1, self.num_classes + 1):
             for bbox in results[j]:
                 if bbox[4] > self.opt.vis_thresh:
                     debugger.add_coco_bbox(bbox[:4], j - 1, bbox[4], img_id=img_id)
-        debugger.show_all_imgs(pause=self.pause)
-        # Uncomment to save predicted image visualizations
-        debugger.save_all_imgs(path='/home/adnan/Workspace/CenterNet/data/refined_corners/predicted_images')
+                    object_bboxes.append(ObjectBbox2D(xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3],
+                                                      class_label=debugger.names[int(j - 1)], confidence_score=bbox[4]))
+        # debugger.show_all_imgs(pause=self.pause)
+        if image_path is not None:
+            od = ObjectDetectionLabeledData(image_name=image_path.name,
+                                            bounding_boxes=object_bboxes,
+                                            width=image.shape[1],
+                                            height=image.shape[0])
+            od.to_json_file(image_path.parent / f'{image_path.stem}.prediction.od.json')
+            debugger.save_all_imgs(path=str(image_path.parent / 'vis'))
