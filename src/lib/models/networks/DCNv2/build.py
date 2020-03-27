@@ -8,8 +8,12 @@ headers = ['src/dcn_v2.h']
 defines = []
 with_cuda = False
 
+build_for_docker = False
+if os.environ.get('DOCKER_BUILD') is not None and \
+        int(os.environ.get('DOCKER_BUILD') == 1):
+    build_for_docker = True
 extra_objects = []
-if torch.cuda.is_available():
+if torch.cuda.is_available() or build_for_docker:
     print('Including CUDA code.')
     sources += ['src/dcn_v2_cuda.c']
     headers += ['src/dcn_v2_cuda.h']
