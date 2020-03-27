@@ -10,7 +10,7 @@ with_cuda = False
 
 build_for_docker = False
 if os.environ.get('DOCKER_BUILD') is not None and \
-        int(os.environ.get('DOCKER_BUILD') == 1):
+        int(os.environ.get('DOCKER_BUILD')) == 1:
     build_for_docker = True
 extra_objects = []
 if torch.cuda.is_available() or build_for_docker:
