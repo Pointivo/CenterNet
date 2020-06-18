@@ -18,7 +18,6 @@ from models.utils import flip_tensor
 from utils.post_process import ctdet_post_process
 
 from .base_detector import BaseDetector
-from image_recognition.app.dvo.ground_truths.object_detection import ObjectDetectionLabeledData, ObjectBbox2D
 
 
 class CtdetDetector(BaseDetector):
@@ -89,6 +88,10 @@ class CtdetDetector(BaseDetector):
                                            img_id='out_pred_{:.1f}'.format(scale))
 
     def show_results(self, debugger, image, results, image_path=None):
+        # Just a temp workaround to generate od jsons for comparing the outputs of original code with our integrated
+        # version
+        from image_recognition.app.dvo.ground_truths.object_detection import ObjectDetectionLabeledData, \
+            AxisAlignedBbox2D
         if image_path is not None:
             image_path = Path(image_path)
             img_id = image_path.name
@@ -100,8 +103,9 @@ class CtdetDetector(BaseDetector):
             for bbox in results[j]:
                 if bbox[4] > self.opt.vis_thresh:
                     debugger.add_coco_bbox(bbox[:4], j - 1, bbox[4], img_id=img_id)
-                    object_bboxes.append(ObjectBbox2D(xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3],
-                                                      class_label=debugger.names[int(j - 1)], confidence_score=bbox[4]))
+                    object_bboxes.append(AxisAlignedBbox2D(xmin=bbox[0], ymin=bbox[1], xmax=bbox[2], ymax=bbox[3],
+                                                           class_label=debugger.names[int(j - 1)],
+                                                           confidence_score=bbox[4]))
         # debugger.show_all_imgs(pause=self.pause)
         if image_path is not None:
             od = ObjectDetectionLabeledData(image_name=image_path.name,
