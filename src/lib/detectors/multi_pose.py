@@ -28,7 +28,7 @@ class MultiPoseDetector(BaseDetector):
 
   def process(self, images, return_time=False):
     with torch.no_grad():
-      if self.opt.device == 'cuda':
+      if self.opt.device.type == 'cuda':
         torch.cuda.synchronize()
       output = self.model(images)[-1]
       output['hm'] = output['hm'].sigmoid_()
@@ -38,7 +38,7 @@ class MultiPoseDetector(BaseDetector):
       reg = output['reg'] if self.opt.reg_offset else None
       hm_hp = output['hm_hp'] if self.opt.hm_hp else None
       hp_offset = output['hp_offset'] if self.opt.reg_hp_offset else None
-      if self.opt.device == 'cuda':
+      if self.opt.device.type == 'cuda':
         torch.cuda.synchronize()
       forward_time = time.time()
       

@@ -27,7 +27,7 @@ class ExdetDetector(BaseDetector):
 
   def process(self, images, return_time=False):
     with torch.no_grad():
-      if self.opt.device == 'cuda':
+      if self.opt.device.type == 'cuda':
         torch.cuda.synchronize()
       output = self.model(images)[-1]
       t_heat = output['hm_t'].sigmoid_()
@@ -35,7 +35,7 @@ class ExdetDetector(BaseDetector):
       b_heat = output['hm_b'].sigmoid_()
       r_heat = output['hm_r'].sigmoid_()
       c_heat = output['hm_c'].sigmoid_()
-      if self.opt.device == 'cuda':
+      if self.opt.device.type == 'cuda':
         torch.cuda.synchronize()
       forward_time = time.time()
       if self.opt.reg_offset:

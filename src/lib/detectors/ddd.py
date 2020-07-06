@@ -56,14 +56,14 @@ class DddDetector(BaseDetector):
   
   def process(self, images, return_time=False):
     with torch.no_grad():
-      if self.opt.device == 'cuda':
+      if self.opt.device.type == 'cuda':
         torch.cuda.synchronize()
       output = self.model(images)[-1]
       output['hm'] = output['hm'].sigmoid_()
       output['dep'] = 1. / (output['dep'].sigmoid() + 1e-6) - 1.
       wh = output['wh'] if self.opt.reg_bbox else None
       reg = output['reg'] if self.opt.reg_offset else None
-      if self.opt.device == 'cuda':
+      if self.opt.device.type == 'cuda':
         torch.cuda.synchronize()
       forward_time = time.time()
       

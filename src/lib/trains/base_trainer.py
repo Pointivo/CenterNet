@@ -49,7 +49,7 @@ class BaseTrainer(object):
       if len(self.opt.gpus) > 1:
         model_with_loss = self.model_with_loss.module
       model_with_loss.eval()
-      if self.opt.device == 'cuda':
+      if self.opt.device.type == 'cuda':
         torch.cuda.empty_cache()
 
     opt = self.opt
