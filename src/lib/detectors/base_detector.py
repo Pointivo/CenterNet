@@ -2,43 +2,46 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import cv2
-import numpy as np
-from progress.bar import Bar
 import os
 import time
+
+import cv2
+import numpy as np
 import torch
 
 from models.model import create_model, load_model
-from utils.image import get_affine_transform
 from utils.debugger import Debugger
+from utils.image import get_affine_transform
+
+torch.manual_seed(seed=23)
 
 
 class BaseDetector(object):
   def __init__(self, opt):
-    if opt.gpus[0] >= 0:
-      opt.device = torch.device('cuda')
-    else:
-      opt.device = torch.device('cpu')
-    
-    print('Creating model...')
-    self.model = create_model(opt.arch, opt.heads, opt.head_conv)
-    self.model = load_model(self.model, opt.load_model)
-    self.model = self.model.to(opt.device)
-    self.model.eval()
-
-    self.mean = np.array(opt.mean, dtype=np.float32).reshape(1, 1, 3)
-    self.std = np.array(opt.std, dtype=np.float32).reshape(1, 1, 3)
-    self.max_per_image = 100
-    self.num_classes = opt.num_classes
-    self.scales = opt.test_scales
     self.opt = opt
+    if self.opt.gpus[0] >= 0:
+      self.opt.device = torch.device('cuda')
+    else:
+      self.opt.device = torch.device('cpu')
+    self.model = self.get_model()
+    self.mean = np.array(self.opt.mean, dtype=np.float32).reshape(1, 1, 3)
+    self.std = np.array(self.opt.std, dtype=np.float32).reshape(1, 1, 3)
+    self.max_per_image = 100
+    self.num_classes = self.opt.num_classes
+    self.scales = self.opt.test_scales
     self.pause = True
+
+  def get_model(self):
+    model = create_model(self.opt.arch, self.opt.heads, self.opt.head_conv)
+    model = load_model(model, self.opt.load_model)
+    model = model.to(self.opt.device)
+    model.eval()
+    return model
 
   def pre_process(self, image, scale, meta=None):
     height, width = image.shape[0:2]
     new_height = int(height * scale)
-    new_width  = int(width * scale)
+    new_width = int(width * scale)
     if self.opt.fix_res:
       inp_height, inp_width = self.opt.input_h, self.opt.input_w
       c = np.array([new_width / 2., new_height / 2.], dtype=np.float32)
